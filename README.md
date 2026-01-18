@@ -5,7 +5,7 @@
 It aggregates ship and flight routes, live coordinates, and geodata into a unified system, providing clear geographic and geopolitical awareness for analysis, visualization, and decision-making.
 . 🚀
 
-🚀 Visit: [haybnz.web.app](https://haybnz.web.app/blog)
+🚀 Visit Blog: [haybnz.web.app](https://haybnz.web.app/blog)
 
 ## 🌟 Features
 
@@ -17,7 +17,76 @@ It aggregates ship and flight routes, live coordinates, and geodata into a unifi
 -   📰 Geopolitical news and sentiment analysis.
 -   💹 Market data for commodities and cryptocurrencies.
 -   🌐 Translation services.
+-   
+###    📦 Download and Move `geodata` Folder to Root Directory
 
+### 🔗 Download Link
+👉 [Download geodata folder](https://drive.proton.me/urls/RJB7K8HXTM#r7PnpGiVkg6P)
+
+### 🔗 Download Link
+-ADD API KEY IN app.py
+-ADD API KEY IN earth.html {on line1850 const tomtomApiKey = 'ADD_API+KEY';}
+
+# 🛰️ GeoSentinel Installation Guide
+
+## 📥 Clone or Fork the Repository
+
+### Option 1: Clone directly
+```bash
+git clone https://github.com/h9zdev/GeoSentinel.git
+```
+
+### Option 2: Fork the repository
+https://github.com/h9zdev/GeoSentinel/fork
+
+Then clone your fork:
+```bash
+git clone https://github.com/<your-username>/GeoSentinel.git
+```
+
+---
+
+## 📂 Navigate to Project Directory
+```bash
+cd GeoSentinel
+```
+
+---
+
+## 🧩 Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+(Optional but recommended)
+```bash
+python -m venv venv
+source venv/bin/activate   # Linux / macOS
+venv\Scripts\activate      # Windows
+```
+
+---
+
+## ▶️ Run the Application
+```bash
+python app.py
+```
+
+---
+
+## 🌐 Open in Browser
+
+- Earth View  
+  https://127.0.0.1:8000/earth
+
+- News Dashboard  
+  https://127.0.0.1:8000/news
+
+---
+
+## ✅ Notes
+- SSL warnings are normal for localhost with HTTPS.
+- Use http://127.0.0.1:8000 if HTTPS is not configured.
 ## ⚙️ API Endpoints
 
 ### 🌎 Earth
@@ -88,19 +157,22 @@ It aggregates ship and flight routes, live coordinates, and geodata into a unifi
 curl http://localhost:8000/api/geo/flights
 ```
 
-## 🙏 Acknowledgements
+## 🙏 API TO USE
 
 -   [OpenStreetMap](https://www.openstreetmap.org/)
 -   [ADSB.one](https://adsb.one/)
 -   [AISstream.io](https://aisstream.io/)
 -   [CoinGecko](https://www.coingecko.com/)
 -   [NewsAPI](https://newsapi.org/)
+-   [tomtom](https://developer.tomtom.com)
 
 ## 🗺️ Images of GeoSentinel UI
 
-## GeoSentinel Visual Overview
+
 
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-08%2001-01-15.png)
+![GeoSentinel Screenshot](https://github.com/h9zdev/GeoSentinel/blob/main/images/Screenshot%20From%202026-01-18%2019-29-41.png)
+
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-08%2002-44-21.png)
 
 
