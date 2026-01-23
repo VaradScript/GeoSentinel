@@ -1609,15 +1609,6 @@
                                 <input type="text" id="coord-search" class="map-control-btn" placeholder="LAT, LONG">
                                 <input type="text" id="place-search" class="map-control-btn"
                                     placeholder="SEARCH SECTOR">
-                                <form id="user-uplink-form" action="/upload" method="post" enctype="multipart/form-data"
-                                    style="display: flex; gap: 2px; align-items: center; background: rgba(0, 255, 209, 0.05); border: 1px solid #00FFD1; padding: 1px 5px; border-radius: 3px;">
-                                    <label for="img" style="font-size: 8px; color: #00FFD1; white-space: nowrap;">Select
-                                        image:</label>
-                                    <input type="file" id="img" name="img" accept="image/*"
-                                        style="font-size: 8px; color: #00FFD1; width: 80px;">
-                                    <input type="submit" value="Upload Image"
-                                        style="background: #00FFD1; color: #000; border: none; font-size: 8px; padding: 1px 4px; cursor: pointer; font-weight: bold; text-transform: uppercase;">
-                                </form>
                             </div>
                             <div class="search-container">
                                 <select id="search-type" style="padding: 0 5px; height: 100%;">
@@ -1626,7 +1617,8 @@
                                     <option value="call">CALL</option>
                                     <option value="type">TYPE</option>
                                 </select>
-                                <input type="text" id="advanced-search" placeholder="FLIGHT SEARCH...">
+                                <input type="text" id="advanced-search" placeholder="FLIGHT SEARCH..."
+                                    style="font-size: 9px; padding: 2px 4px; width: 100px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: var(--primary-color);">
 
                                 <div class="flight-filter-container">
                                     <button class="flight-filter-btn active" data-filter="all">ALL</button>
@@ -1643,7 +1635,7 @@
                                     <option value="mmsi">MMSI</option>
                                 </select>
                                 <input type="text" id="ship-search-input" placeholder="VESSEL..."
-                                    style="flex:1; background:rgba(2, 4, 5, 0.9); border:1px solid #00FF88; border-left:none; color:#00FF88; font-family: 'Share Tech Mono', monospace; font-size:10px; padding:2px 5px; outline:none; height: 20px;">
+                                    style="flex:1; background:rgba(2, 4, 5, 0.9); border:1px solid #00FF88; border-left:none; color:#00FF88; font-family: 'Share Tech Mono', monospace; font-size:9px; padding:2px 4px; outline:none; height: 18px; width: 100px;">
 
                                 <div class="vessel-filter-container" style="display:flex; gap:2px; margin-left:5px;">
                                     <button class="vessel-filter-btn active" data-filter="all"
@@ -2225,7 +2217,6 @@
                 if (currentFlightFilter === 'private') return f.type === 'private';
                 if (currentFlightFilter === 'emergency') return f.type === 'emergency';
                 if (currentFlightFilter === 'airline') {
-                    // Commercial/Airline is anything that isn't the special types
                     return f.type !== 'military' && f.type !== 'private' && f.type !== 'emergency';
                 }
                 return true;
@@ -2234,7 +2225,6 @@
             filteredData.forEach((f) => {
                 const icao = f.icao24;
                 const pos = [f.lat, f.long];
-
                 const inBounds = bounds.contains(pos);
 
                 if (!inBounds) {
@@ -2248,72 +2238,27 @@
                 currentIcaoSet.add(icao);
 
                 if (flightMarkers[icao]) {
-                    if (zoom < 7 && flightMarkers[icao] instanceof L.CircleMarker) {
-                        flightMarkers[icao].setLatLng(pos);
-                    } else if (zoom >= 7 && flightMarkers[icao] instanceof L.Marker) {
-                        flightMarkers[icao].setLatLng(pos);
-                        flightMarkers[icao].setIcon(getFlightIcon(f.heading, f.type));
-                    } else {
-                        flightLayerGroup.removeLayer(flightMarkers[icao]);
-                        delete flightMarkers[icao];
-                    }
-                }
+                    const marker = flightMarkers[icao];
+                    const isCircle = marker instanceof L.CircleMarker;
+                    const shouldBeCircle = zoom < 7;
 
-                if (!flightMarkers[icao]) {
-                    let marker;
-                    if (zoom < 7) {
-                        let color = '#00FFD1';
-                        if (f.type === 'military') color = '#FF4400';
-                        else if (f.type === 'private') color = '#FF00FF';
-                        else if (f.type === 'emergency') color = '#FFFFFF';
-
-                        marker = L.circleMarker(pos, {
-                            radius: 3,
-                            fillColor: color,
-                            color: '#000',
-                            weight: 1,
-                            opacity: 1,
-                            fillOpacity: 0.8
-                        });
-                    } else {
-                        marker = L.marker(pos, { icon: getFlightIcon(f.heading, f.type) });
-                    }
-
-                    marker.bindPopup(() => {
-                        return `
-                        <div id="popup-${icao}">
-                            <div style="color:var(--cyberpunk-blue); font-weight:bold; border-bottom:1px solid var(--cyberpunk-blue); margin-bottom:5px;">UPLINK: ${f.icao24.toUpperCase()}</div>
-                            <div class="popup-detail-item"><strong>CALLSIGN:</strong> ${f.callsign}</div>
-                            <div class="popup-detail-item"><strong>REG:</strong> ${f.registration || '---'}</div>
-                            <div class="popup-detail-item"><strong>TYPE:</strong> ${f.aircraft_type || '---'}</div>
-                            <div class="popup-detail-item"><strong>SQUAWK:</strong> ${f.squawk || '----'}</div>
-                            <div class="popup-detail-item"><strong>ALT:</strong> ${Math.round(f.alt || 0)}ft | <strong>SPD:</strong> ${Math.round(f.velocity || 0)}kts</div>
-                            <div class="popup-detail-item"><strong>HDG:</strong> ${Math.round(f.heading || 0)}° | <strong>CLASS:</strong> ${f.type.toUpperCase()}</div>
-                            <div style="margin-top:8px; display:flex; gap:10px;">
-                                <a href="https://www.flightradar24.com/${f.callsign}" target="_blank" class="external-link"><i class="fas fa-external-link-alt"></i> FR24</a>
-                                <a href="https://globe.adsbexchange.com/?icao=${f.icao24}" target="_blank" class="external-link"><i class="fas fa-external-link-alt"></i> ADSB</a>
-                            </div>
-                        </div>`;
-                    });
-
-                    marker.on('click', () => {
-                        flightPathGroup.clearLayers();
-                        if (flightHistory[icao] && flightHistory[icao].length > 1) {
-                            L.polyline(flightHistory[icao], {
-                                color: '#00A3FF',
-                                weight: 3,
-                                opacity: 0.8,
-                                dashArray: '8, 4',
-                                className: 'flight-path'
-                            }).addTo(flightPathGroup);
+                    if (isCircle === shouldBeCircle) {
+                        marker.setLatLng(pos);
+                        if (!shouldBeCircle) {
+                            marker.setIcon(getFlightIcon(f.heading, f.type));
                         }
-                    });
-
-                    marker.addTo(flightLayerGroup);
-                    flightMarkers[icao] = marker;
+                    } else {
+                        // Change marker type (Circle <-> Plane)
+                        flightLayerGroup.removeLayer(marker);
+                        delete flightMarkers[icao];
+                        createMarker(f, pos, zoom);
+                    }
+                } else {
+                    createMarker(f, pos, zoom);
                 }
             });
 
+            // Cleanup old markers
             for (const icao in flightMarkers) {
                 if (!currentIcaoSet.has(icao)) {
                     flightLayerGroup.removeLayer(flightMarkers[icao]);
@@ -2322,57 +2267,107 @@
             }
         }
 
+        function createMarker(f, pos, zoom) {
+            const icao = f.icao24;
+            let marker;
+            if (zoom < 7) {
+                let color = '#00FFD1';
+                if (f.type === 'military') color = '#FF4400';
+                else if (f.type === 'private') color = '#FF00FF';
+                else if (f.type === 'emergency') color = '#FFFFFF';
+
+                marker = L.circleMarker(pos, {
+                    radius: 3,
+                    fillColor: color,
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+            } else {
+                marker = L.marker(pos, { icon: getFlightIcon(f.heading, f.type) });
+            }
+
+            marker.bindPopup(() => {
+                return `
+                <div id="popup-${icao}">
+                    <div style="color:var(--cyberpunk-blue); font-weight:bold; border-bottom:1px solid var(--cyberpunk-blue); margin-bottom:5px;">UPLINK: ${f.icao24.toUpperCase()}</div>
+                    <div class="popup-detail-item"><strong>CALLSIGN:</strong> ${f.callsign}</div>
+                    <div class="popup-detail-item"><strong>REG:</strong> ${f.registration || '---'}</div>
+                    <div class="popup-detail-item"><strong>TYPE:</strong> ${f.aircraft_type || '---'}</div>
+                    <div class="popup-detail-item"><strong>SQUAWK:</strong> ${f.squawk || '----'}</div>
+                    <div class="popup-detail-item"><strong>ALT:</strong> ${Math.round(f.alt || 0)}ft | <strong>SPD:</strong> ${Math.round(f.velocity || 0)}kts</div>
+                    <div class="popup-detail-item"><strong>HDG:</strong> ${Math.round(f.heading || 0)}° | <strong>CLASS:</strong> ${f.type.toUpperCase()}</div>
+                    <div style="margin-top:8px; display:flex; gap:10px;">
+                        <a href="https://www.flightradar24.com/${f.callsign}" target="_blank" class="external-link"><i class="fas fa-external-link-alt"></i> FR24</a>
+                        <a href="https://globe.adsbexchange.com/?icao=${f.icao24}" target="_blank" class="external-link"><i class="fas fa-external-link-alt"></i> ADSB</a>
+                    </div>
+                </div>`;
+            });
+
+            marker.on('click', () => {
+                flightPathGroup.clearLayers();
+                if (flightHistory[icao] && flightHistory[icao].length > 1) {
+                    L.polyline(flightHistory[icao], {
+                        color: '#00A3FF',
+                        weight: 3,
+                        opacity: 0.8,
+                        dashArray: '8, 4',
+                        className: 'flight-path'
+                    }).addTo(flightPathGroup);
+                }
+            });
+
+            marker.addTo(flightLayerGroup);
+            flightMarkers[icao] = marker;
+        }
+
         async function updateFlightTracker() {
             if (!flightEnabled) return;
 
+            const listEl = document.getElementById('flights-active-list');
             try {
-                const res = await axios.get('/api/geo/flights');
-                const flights = res.data;
-                lastFlightData = flights;
-
-                console.log('Flights received:', flights.length);
-
-                const listEl = document.getElementById('flights-active-list');
                 if (listEl) {
-                    if (flights.error) {
-                        console.error('Flight API Error:', flights.error);
-                        listEl.innerHTML = `<div class="log-entry alert" style="padding: 5px;">API_ERROR: ${flights.error}</div>`;
-                        return;
-                    }
-
-                    if (flights.length > 0) {
-                        listEl.innerHTML = `<div style="padding: 5px; color: var(--cyberpunk-blue); border-bottom: 1px solid rgba(0,255,209,0.1);">ACTIVE_UPLINKS: ${flights.length}</div>`;
-                        flights.slice(0, 50).forEach(f => {
-                            const item = document.createElement('div');
-                            item.className = 'geojson-item';
-                            item.style.fontSize = '9px';
-                            item.style.padding = '2px 10px';
-                            item.style.cursor = 'pointer';
-                            const typeIcon = f.type === 'military' ? '🚁' : (f.type === 'private' ? '🛫' : '✈️');
-                            item.innerHTML = `<span style="color:var(--cyberpunk-blue)">[${f.icao24.toUpperCase()}]</span> ${typeIcon} ${f.callsign}`;
-                            item.onclick = () => {
-                                map.setView([f.lat, f.long], 10);
-                                if (flightMarkers[f.icao24]) flightMarkers[f.icao24].openPopup();
-                            };
-                            listEl.appendChild(item);
-                        });
-                    } else {
-                        listEl.innerHTML = `<div class="log-entry warn" style="padding: 5px;">NO_AIRCRAFT_DETECTED</div>`;
-                    }
+                    listEl.innerHTML = `<div style="padding: 5px; color: var(--neon-cyan); border-bottom: 1px solid rgba(0,255,209,0.1); font-size: 10px;"><i class="fas fa-satellite-dish fa-spin"></i> SYNCING_GLOBAL_UPLINK...</div>`;
                 }
 
-                // Update flight history
+                const res = await axios.get('/api/geo/flights');
+                const flights = res.data;
+
+                const accumulatedFlights = window._accumulated_flights || {};
                 flights.forEach(f => {
-                    const icao = f.icao24;
+                    accumulatedFlights[f.icao24] = f;
                     const pos = [f.lat, f.long];
-                    if (!flightHistory[icao]) flightHistory[icao] = [];
-                    flightHistory[icao].push(pos);
-                    if (flightHistory[icao].length > 100) flightHistory[icao].shift();
+                    if (!flightHistory[f.icao24]) flightHistory[f.icao24] = [];
+                    flightHistory[f.icao24].push(pos);
+                    if (flightHistory[f.icao24].length > 100) flightHistory[f.icao24].shift();
                 });
+                window._accumulated_flights = accumulatedFlights;
+                lastFlightData = Object.values(accumulatedFlights);
 
                 renderFlights();
 
-            } catch (err) { console.error("Flight Tracker Error:", err); }
+                if (listEl) {
+                    listEl.innerHTML = `<div style="padding: 5px; color: var(--cyberpunk-blue); border-bottom: 1px solid rgba(0,255,209,0.1);">ACTIVE_UPLINKS: ${lastFlightData.length}</div>`;
+                    lastFlightData.slice(0, 50).forEach(f => {
+                        const item = document.createElement('div');
+                        item.className = 'geojson-item';
+                        item.style.fontSize = '9px';
+                        item.style.padding = '2px 10px';
+                        item.style.cursor = 'pointer';
+                        const typeIcon = f.type === 'military' ? '🚁' : (f.type === 'private' ? '🛫' : '✈️');
+                        item.innerHTML = `<span style="color:var(--cyberpunk-blue)">[${f.icao24.toUpperCase()}]</span> ${typeIcon} ${f.callsign}`;
+                        item.onclick = () => {
+                            map.setView([f.lat, f.long], 10);
+                            if (flightMarkers[f.icao24]) flightMarkers[f.icao24].openPopup();
+                        };
+                        listEl.appendChild(item);
+                    });
+                }
+            } catch (err) {
+                console.error("Flight Tracker Error:", err);
+                if (listEl) listEl.innerHTML = `<div class="log-entry alert" style="padding: 5px;">UPLINK_FAILURE: ${err.message}</div>`;
+            }
         }
 
         document.getElementById('flight-toggle').addEventListener('change', (e) => {
@@ -3420,170 +3415,6 @@
                     geojsonLayerGroup.clearLayers();
                 }
             });
-        });
-
-
-
-        // --- USER-SPECIFIED IMAGE UPLINK LOGIC ---
-        const userForm = document.getElementById('user-uplink-form');
-        if (userForm) {
-            userForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const fileInput = document.getElementById('img');
-                const file = fileInput.files[0];
-                if (!file) return;
-
-                // Create a temporary status entry in the list
-                const listEl = document.getElementById('segments-active-list');
-                if (listEl) {
-                    listEl.style.display = 'block';
-                    listEl.innerHTML = '<div class="log-entry info" style="padding: 5px; font-size: 10px; color:#00FFD1;">UPLOADING_IMAGE... ANALYZING_VECTORS...</div>';
-                }
-
-                const formData = new FormData();
-                formData.append('img', file); // Matching user's name="img"
-
-                try {
-                    // Use the user's action path but handle it via AJAX for the popup result
-                    const res = await axios.post('/upload', formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-                    const data = res.data;
-
-                    if (data.status === "ANALYSIS_COMPLETE") {
-                        if (listEl) listEl.innerHTML = `<div class="log-entry success" style="padding: 5px; color: #00FFD1;">DISCOVERY_COMPLETE: ${data.count} OBJ FOUND</div>`;
-
-                        // Show Modal
-                        const modal = document.getElementById('discovery-modal');
-                        if (modal) {
-                            modal.style.display = 'block';
-                            document.getElementById('discovery-time').innerText = data.timestamp;
-
-                            const loc = data.location;
-                            if (loc && loc.lat !== "UNKNOWN") {
-                                document.getElementById('discovery-loc').innerText = `${loc.lat.toFixed(6)}, ${loc.lon.toFixed(6)}`;
-                                map.setView([loc.lat, loc.lon], 16);
-                            } else {
-                                document.getElementById('discovery-loc').innerText = "DATA_REDACTED / NO_GPS";
-                            }
-
-                            // Preview Image
-                            const reader = new FileReader();
-                            reader.onload = (ev) => {
-                                document.getElementById('discovery-img').src = ev.target.result;
-                            };
-                            reader.readAsDataURL(file);
-
-                            // Render Object List
-                            const listContainer = document.getElementById('discovery-list');
-                            if (listContainer) {
-                                listContainer.innerHTML = '';
-                                data.objects.forEach(obj => {
-                                    const item = document.createElement('div');
-                                    item.style.padding = '4px 0';
-                                    item.style.borderBottom = '1px solid rgba(0, 255, 209, 0.1)';
-                                    item.innerHTML = `<span style="color:#00FFD1; font-weight:bold;">[${obj.tag}]</span> ${obj.object} (${obj.confidence})`;
-                                    listContainer.appendChild(item);
-                                });
-                            }
-                        }
-                    }
-                } catch (err) {
-                    console.error("Discovery Error:", err);
-                    if (listEl) listEl.innerHTML = `<div class="log-entry alert" style="padding: 5px;">UPLINK_FAILED: ${err.message}</div>`;
-                }
-            });
-        }
-
-
-        // Map button just triggers the hidden input dialog in the form
-        if (document.getElementById('map-uplink-btn')) {
-            document.getElementById('map-uplink-btn').addEventListener('click', () => {
-                document.getElementById('image-uplink-input').click();
-            });
-        }
-
-        // Form submission handler
-        document.getElementById('image-uplink-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fileInput = document.getElementById('image-uplink-input');
-            const file = fileInput.files[0];
-            if (!file) {
-                alert("NO_SOURCE_IMAGE_DETECTED");
-                return;
-            }
-
-            // Show loading state
-            const listEl = document.getElementById('segments-active-list');
-            listEl.style.display = 'block';
-            listEl.innerHTML = '<div class="log-entry info" style="padding: 5px; font-size: 10px; color:#00FFD1;">UPLOADING_IMAGE... ANALYZING_VECTORS...</div>';
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-                const res = await axios.post('/api/geo/analyze-upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                const data = res.data;
-
-                if (data.status === "ANALYSIS_COMPLETE") {
-                    listEl.innerHTML = `<div class="log-entry success" style="padding: 5px; color: #00FFD1;">DISCOVERY_COMPLETE: ${data.count} OBJ FOUND</div>`;
-
-                    // Show Modal
-                    const modal = document.getElementById('discovery-modal');
-                    modal.style.display = 'block';
-                    document.getElementById('discovery-time').innerText = data.timestamp;
-
-                    const loc = data.location;
-                    if (loc && loc.lat !== "UNKNOWN") {
-                        document.getElementById('discovery-loc').innerText = `${loc.lat.toFixed(6)}, ${loc.lon.toFixed(6)}`;
-                        map.setView([loc.lat, loc.lon], 16);
-
-                        // Clear old markers if any
-                        if (window.discoveryMarker) map.removeLayer(window.discoveryMarker);
-
-                        window.discoveryMarker = L.marker([loc.lat, loc.lon], {
-                            icon: L.divIcon({
-                                className: 'discovery-marker',
-                                html: '<div style="width:20px; height:20px; border:2px solid #00FFD1; border-radius:50%; box-shadow: 0 0 10px #00FFD1; position:relative;"><div style="width:6px; height:6px; background:#00FFD1; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);"></div></div>',
-                                iconSize: [20, 20],
-                                iconAnchor: [10, 10]
-                            })
-                        }).addTo(map).bindPopup(`<strong>DISCOVERY_ORIGIN</strong><br>${loc.lat.toFixed(6)}, ${loc.lon.toFixed(6)}`).openPopup();
-                    } else {
-                        document.getElementById('discovery-loc').innerText = "DATA_REDACTED / NO_GPS";
-                    }
-
-                    // Preview Image
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        document.getElementById('discovery-img').src = ev.target.result;
-                    };
-                    reader.readAsDataURL(file);
-
-                    // Render Object List
-                    const listContainer = document.getElementById('discovery-list');
-                    listContainer.innerHTML = '';
-                    if (data.objects && data.objects.length > 0) {
-                        data.objects.forEach(obj => {
-                            const item = document.createElement('div');
-                            item.style.padding = '4px 0';
-                            item.style.borderBottom = '1px solid rgba(0, 255, 209, 0.1)';
-                            item.innerHTML = `<span style="color:#00FFD1; font-weight:bold;">[${obj.tag}]</span> ${obj.object} (${obj.confidence})`;
-                            listContainer.appendChild(item);
-                        });
-                    } else {
-                        listContainer.innerHTML = '<div style="color:rgba(0, 255, 209, 0.5); padding: 10px; text-align: center;">NO_ENTITY_DETECTED_IN_SECTOR</div>';
-                    }
-                }
-            } catch (err) {
-                console.error("Discovery Error:", err);
-                listEl.innerHTML = `<div class="log-entry alert" style="padding: 5px;">UPLINK_FAILED: ${err.message}</div>`;
-            }
-
-            // Note: Not resetting file input automatically so user can re-submit if needed, 
-            // but generally good to reset after success.
         });
     </script>
 
