@@ -145,100 +145,201 @@ def get_geo_tile(z, x, y):
         return jsonify({"error": str(e)}), 500
 
 
+# Live flight data configuration
+ADSB_REGIONS = [
+    # North America
+    ("https://opendata.adsb.fi/api/v3/lat/40/lon/-100/dist/250", "NorthAmerica_Central"),
+    ("https://opendata.adsb.fi/api/v3/lat/45/lon/-75/dist/250", "USA_East"),
+    ("https://opendata.adsb.fi/api/v3/lat/35/lon/-120/dist/250", "USA_West"),
+    ("https://opendata.adsb.fi/api/v3/lat/30/lon/-90/dist/250", "USA_South"),
+    ("https://opendata.adsb.fi/api/v3/lat/50/lon/-110/dist/250", "Canada_West"),
+    # Europe
+    ("https://opendata.adsb.fi/api/v3/lat/50/lon/10/dist/250", "Europe_Central"),
+    ("https://opendata.adsb.fi/api/v3/lat/51/lon/0/dist/250", "Europe_UK"),
+    ("https://opendata.adsb.fi/api/v3/lat/40/lon/-3/dist/250", "Europe_Spain"),
+    ("https://opendata.adsb.fi/api/v3/lat/45/lon/5/dist/250", "Europe_France"),
+    ("https://opendata.adsb.fi/api/v3/lat/42/lon/12/dist/250", "Europe_Italy"),
+    ("https://opendata.adsb.fi/api/v3/lat/52/lon/21/dist/250", "Europe_Poland"),
+    # Asia
+    ("https://opendata.adsb.fi/api/v3/lat/28/lon/77/dist/250", "SouthAsia_India"),
+    ("https://opendata.adsb.fi/api/v3/lat/19/lon/72/dist/250", "India_Mumbai"),
+    ("https://opendata.adsb.fi/api/v3/lat/35/lon/139/dist/250", "Japan_Tokyo"),
+    ("https://opendata.adsb.fi/api/v3/lat/31/lon/121/dist/250", "China_Shanghai"),
+    ("https://opendata.adsb.fi/api/v3/lat/22/lon/114/dist/250", "China_HongKong"),
+    ("https://opendata.adsb.fi/api/v3/lat/13/lon/100/dist/250", "SEAsia_Thailand"),
+    ("https://opendata.adsb.fi/api/v3/lat/1/lon/103/dist/250", "SEAsia_Singapore"),
+    # Russia
+    ("https://opendata.adsb.fi/api/v3/lat/55/lon/37/dist/250", "Russia_Moscow"),
+    ("https://opendata.adsb.fi/api/v3/lat/55/lon/82/dist/250", "Russia_Siberia"),
+    ("https://opendata.adsb.fi/api/v3/lat/43/lon/131/dist/250", "Russia_FarEast"),
+    # Oceania
+    ("https://opendata.adsb.fi/api/v3/lat/-33/lon/151/dist/250", "Australia_East"),
+    ("https://opendata.adsb.fi/api/v3/lat/-37/lon/144/dist/250", "Australia_South"),
+    # South America
+    ("https://opendata.adsb.fi/api/v3/lat/-23/lon/-46/dist/250", "SouthAmerica_Brazil"),
+    ("https://opendata.adsb.fi/api/v3/lat/-34/lon/-58/dist/250", "SouthAmerica_Argentina"),
+    ("https://opendata.adsb.fi/api/v3/lat/4/lon/-74/dist/250", "SouthAmerica_Colombia"),
+    # Africa
+    ("https://opendata.adsb.fi/api/v3/lat/30/lon/31/dist/250", "Africa_Egypt"),
+    ("https://opendata.adsb.fi/api/v3/lat/-26/lon/28/dist/250", "Africa_South"),
+    ("https://opendata.adsb.fi/api/v3/lat/-1/lon/36/dist/250", "Africa_East"),
+    ("https://opendata.adsb.fi/api/v3/lat/6/lon/3/dist/250", "Africa_West"),
+    # Middle East
+    ("https://opendata.adsb.fi/api/v3/lat/25/lon/55/dist/250", "MiddleEast_Dubai"),
+    ("https://opendata.adsb.fi/api/v3/lat/32/lon/34/dist/250", "MiddleEast_Israel"),
+    ("https://opendata.adsb.fi/api/v3/lat/24/lon/46/dist/250", "MiddleEast_Saudi"),
+]
 
+def fetch_opensky_data():
+    """Fetch global state vectors from OpenSky Network (Free API)."""
+    try:
+        # OpenSky global states (anonymous access has rate limits but works)
+        url = "https://opensky-network.org/api/states/all"
+        response = requests.get(url, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            states = data.get('states', [])
+            aircraft = []
+            for s in states:
+                if s[5] is None or s[6] is None: continue # No lat/lon
+                aircraft.append({
+                    'hex': s[0],
+                    'flight': (s[1] or '').strip(),
+                    'r': '', # Registration not in simple states
+                    't': '', # Type not in simple states
+                    'lat': s[6],
+                    'lon': s[5],
+                    'alt_baro': s[7],
+                    'gs': s[9],
+                    'track': s[10],
+                    'squawk': s[14] or '----',
+                    'source': 'OpenSky'
+                })
+            return aircraft
+    except Exception as e:
+        print(f"OpenSky Fetch Error: {e}")
+    return []
 
+@app.route('/api/geo/regions')
+@login_required
+def get_flight_regions():
+    """Return the list of configured ADSB regions."""
+    regs = [{"name": r[1], "id": i} for i, r in enumerate(ADSB_REGIONS)]
+    # Add OpenSky as a virtual region
+    regs.append({"name": "Global_OpenSky", "id": -1})
+    return jsonify(regs)
 
+from concurrent.futures import ThreadPoolExecutor
 
-    
+def fetch_region_data(url, region_name, headers):
+    """Helper to fetch data for a single region."""
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            return response.json().get('ac', [])
+    except Exception as e:
+        print(f"Error fetching {region_name}: {e}")
+    return []
 
 @app.route('/api/geo/flights')
-
+@login_required
 def get_flight_data():
-    """Fetch live flight data from adsb.one API (comprehensive global coverage)."""
+    """Fetch live flight data from adsb.fi API (comprehensive global coverage using v3)."""
     search_q = request.args.get('q', '').strip().upper()
+    region_idx = request.args.get('region_idx', type=int)
     
-    # adsb.one provides excellent global coverage - query multiple regions
-    # Format: /v2/point/{lat}/{lon}/{radius_nm}
-    regions = [
-        ("https://api.adsb.one/v2/point/40/-100/4000", "Americas"),   # North America
-        ("https://api.adsb.one/v2/point/50/10/3000", "Europe"),       # Europe
-        ("https://api.adsb.one/v2/point/25/80/3000", "Asia"),         # South Asia
-        ("https://api.adsb.one/v2/point/35/135/2500", "EastAsia"),    # East Asia
-        ("https://api.adsb.one/v2/point/-25/135/2000", "Oceania"),    # Australia
-        ("https://api.adsb.one/v2/point/60/90/4000", "Russia"),       # Russia/Eurasia
-        ("https://api.adsb.one/v2/point/35/105/2500", "China"),       # China/Central Asia
-        ("https://api.adsb.one/v2/point/-15/-60/3000", "SouthAmerica"), # South America
-        ("https://api.adsb.one/v2/point/5/20/3500", "Africa"),          # Africa
-    ]
-    
+    headers = {"User-Agent": "SkyScanFlightTracker/1.0 (HayOS Uplink)"}
     all_flights = {}  # Use dict to dedupe by hex
     
-    for url, region_name in regions:
-        try:
-            response = requests.get(url, timeout=20)
-            if response.status_code == 200:
-                data = response.json()
-                aircraft_list = data.get('ac', [])
-                
-                for ac in aircraft_list:
-                    # Skip if no position data
-                    if ac.get('lat') is None or ac.get('lon') is None:
-                        continue
-                    
-                    hex_code = ac.get('hex', '').upper()
-                    if hex_code in all_flights:
-                        continue  # Already have this aircraft
-                    
-                    callsign = (ac.get('flight', '') or '').strip() or ac.get('r', '') or hex_code
-                    registration = ac.get('r', '')
-                    aircraft_type = ac.get('t', '')
-                    
-                    # Apply search filter if provided
-                    if search_q:
-                        if search_q not in hex_code and search_q not in callsign.upper() and search_q not in registration.upper():
-                            continue
-                    
-                    # Type classification with color coding
-                    # Military detection
-                    mil_prefixes = ['RCH', 'SPAR', 'SAM', 'AF1', 'MAGMA', 'ASCOT', 'BAF', 'GAF', 
-                                   'PLF', 'DUKE', 'NAVY', 'COBRA', 'VIPER', 'REACH', 'EVAC']
-                    mil_types = ['C17', 'C130', 'C5', 'KC135', 'KC10', 'F15', 'F16', 'F18', 
-                                'F22', 'F35', 'B52', 'B1', 'B2', 'E3', 'E6', 'P8', 'V22']
-                    
-                    is_mil = any(callsign.upper().startswith(p) for p in mil_prefixes) or \
-                             any(t in aircraft_type.upper() for t in mil_types)
-                    
-                    # Private aircraft detection  
-                    priv_types = ['C172', 'C182', 'C208', 'PA28', 'SR22', 'TBM9', 'PC12', 'CL60', 'C152', 'PA32']
-                    is_priv = (callsign.startswith('N') and len(callsign) <= 6) or \
-                              callsign.startswith('G-') or callsign.startswith('VH-') or \
-                              aircraft_type.upper() in priv_types
-                    
-                    # Emergency detection
-                    is_emergency = ac.get('emergency', 'none') != 'none' or ac.get('squawk') == '7700'
-                    
-                    # Default to commercial (blue) - all flights visible!
-                    f_type = "commercial"
-                    if is_emergency: f_type = "emergency"
-                    elif is_mil: f_type = "military"
-                    elif is_priv: f_type = "private"
-                    
-                    all_flights[hex_code] = {
-                        "icao24": hex_code.lower(),
-                        "callsign": callsign,
-                        "registration": registration or "---",
-                        "aircraft_type": aircraft_type or "---",
-                        "long": ac.get('lon'),
-                        "lat": ac.get('lat'),
-                        "alt": ac.get('alt_baro') or ac.get('alt_geom') or 0,
-                        "velocity": ac.get('gs', 0),
-                        "heading": ac.get('track', 0),
-                        "squawk": ac.get('squawk', '----'),
-                        "type": f_type
-                    }
-        except Exception as e:
-            print(f"Error fetching {region_name}: {e}")
+    selected_regions = []
+    if region_idx is not None and 0 <= region_idx < len(ADSB_REGIONS):
+        selected_regions = [ADSB_REGIONS[region_idx]]
+    else:
+        selected_regions = ADSB_REGIONS
+
+    # Use ThreadPoolExecutor for high-parallelism fetching
+    aircraft_data = []
+    
+    # Always fetch all regions and OpenSky for a unified view
+    with ThreadPoolExecutor(max_workers=25) as executor:
+        # 1. Fetch OpenSky
+        os_future = executor.submit(fetch_opensky_data)
+        
+        # 2. Fetch all ADSB regions
+        # If a specific region_idx is provided, we still obey it for targeted scans, 
+        # but the default (no region_idx) will fetch EVERYTHING.
+        target_regions = selected_regions if region_idx is not None else ADSB_REGIONS
+        adsb_futures = [executor.submit(fetch_region_data, url, name, headers) for url, name in target_regions]
+        
+        # 3. Combine results
+        aircraft_data.extend(os_future.result())
+        for future in adsb_futures:
+            aircraft_data.extend(future.result())
+
+    for ac in aircraft_data:
+        # Skip if no position data
+        if ac.get('lat') is None or ac.get('lon') is None:
             continue
+        
+        hex_code = (ac.get('hex') or ac.get('icao') or '').upper()
+        if not hex_code or hex_code in all_flights:
+            continue  # Already have this aircraft
+        
+        # Field mapping with better fallbacks
+        # ADSB.fi uses 'flight' for callsign, 'r' for registration, 't' for type
+        # OpenSky uses 'flight' for callsign
+        callsign = (ac.get('flight', '') or '').strip()
+        registration = ac.get('r', '') or ac.get('reg', '')
+        aircraft_type = ac.get('t', '') or ac.get('type', '')
+        squawk = ac.get('squawk') or '----'
+        
+        # If callsign is missing, use hex
+        if not callsign: callsign = hex_code
+        
+        # Apply search filter if provided
+        if search_q:
+            if search_q not in hex_code and search_q not in callsign.upper() and search_q not in (registration or '').upper():
+                continue
+        
+        # Type classification with color coding
+        # Military detection
+        mil_prefixes = ['RCH', 'SPAR', 'SAM', 'AF1', 'MAGMA', 'ASCOT', 'BAF', 'GAF', 
+                       'PLF', 'DUKE', 'NAVY', 'COBRA', 'VIPER', 'REACH', 'EVAC']
+        mil_types = ['C17', 'C130', 'C5', 'KC135', 'KC10', 'F15', 'F16', 'F18', 
+                    'F22', 'F35', 'B52', 'B1', 'B2', 'E3', 'E6', 'P8', 'V22']
+        
+        is_mil = any(callsign.upper().startswith(p) for p in mil_prefixes) or \
+                 any(t in (aircraft_type or '').upper() for t in mil_types)
+        
+        # Private aircraft detection  
+        priv_types = ['C172', 'C182', 'C208', 'PA28', 'SR22', 'TBM9', 'PC12', 'CL60', 'C152', 'PA32']
+        is_priv = (callsign.startswith('N') and len(callsign) <= 6) or \
+                  callsign.startswith('G-') or callsign.startswith('VH-') or \
+                  (aircraft_type or '').upper() in priv_types
+        
+        # Emergency detection
+        is_emergency = ac.get('emergency', 'none') != 'none' or squawk == '7700'
+        
+        # Default to commercial (blue) - all flights visible!
+        f_type = "commercial"
+        if is_emergency: f_type = "emergency"
+        elif is_mil: f_type = "military"
+        elif is_priv: f_type = "private"
+        
+        all_flights[hex_code] = {
+            "icao24": hex_code.lower(),
+            "callsign": callsign,
+            "registration": registration or "---",
+            "aircraft_type": aircraft_type or "---",
+            "long": ac.get('lon') or ac.get('lon'), # Handle different param names if any
+            "lat": ac.get('lat') or ac.get('lat'),
+            "alt": ac.get('alt_baro') or ac.get('alt_geom') or ac.get('alt') or 0,
+            "velocity": ac.get('gs') or ac.get('speed') or 0,
+            "heading": ac.get('track') or ac.get('heading') or 0,
+            "squawk": squawk,
+            "type": f_type,
+            "source": ac.get('source', 'ADSB.fi')
+        }
     
     return jsonify(list(all_flights.values()))
 
