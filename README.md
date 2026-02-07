@@ -11,6 +11,15 @@ It aggregates ship and flight routes, live coordinates, and geodata into a unifi
 
 🚀 Visit Blog: [VaradScript.web.app](https://varadaraj.online/)
 ⁨![Profile Views](https://komarev.com/ghpvc/?username=VaradScript&label=Profile%20Views&color=0e75b6&style=flat)⁩
+🚀 Visit Blog: [haybnz.web.app](https://haybnz.web.app/blog)
+
+> 🔴 **NOTE:**  
+> <span style="color:red;">Get Updates on the Latest Geo Sentinel AI Releases</span>  
+>  
+> 👉 Subscribe here:  
+> https://docs.google.com/forms/d/e/1FAIpQLSe3qBh6r1orih2MkLf5DjdolX0jv5Abct02363lLxpXEute-Q/viewform?usp=header
+
+
 ## 🌟 Features
 
 -   🗺️ Access to GeoJSON data and surveillance grid tiles.
@@ -206,6 +215,9 @@ Donate via Monero: `45PU6txuLxtFFcVP95qT2xXdg7eZzPsqFfbtZp5HTjLbPquDAugBKNSh1bJ7
 [<img src="https://avatars.githubusercontent.com/u/180658853?s=64&v=4" width="64" height="64" alt="Steiynbrodt">](https://github.com/Steiynbrodt)  
 [<img src="https://avatars.githubusercontent.com/u/220222050?v=4&size=64" width="64" height="64" alt="H9yzz">](https://github.com/H9yzz)  
 [<img src="https://avatars.githubusercontent.com/u/108749445?s=64&size=64" width="64" height="64" alt="VaradScript">](https://github.com/VaradScript)  
+
+## 👥 
+ X9 CYBERNETICS
 
 
 ## Star History
