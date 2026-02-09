@@ -33,6 +33,12 @@ Stay updated with the latest **Geo Sentinel AI** releases and announcements.
 👉 **Subscribe here:**  
 https://docs.google.com/forms/d/e/1FAIpQLSe3qBh6r1orih2MkLf5DjdolX0jv5Abct02363lLxpXEute-Q/viewform
 
+## 📚 Documentation
+
+Detailed guides on how to use GeoSentinel's advanced features:
+- 🤖 [GeoSential AI Guide](docs/geosential_ai.md) - Learn how to use the AI assistant and its commands.
+- 🔍 [Search & Dark Web Guide](docs/search_options.md) - Instructions for OSINT and dark web searching.
+
 ## 🌟 Features
 
 -   🗺️ Access to GeoJSON data and surveillance grid tiles.
@@ -224,12 +230,25 @@ ollama serve
 
 ## 🙏 API TO USE
 
--   [OpenStreetMap](https://www.openstreetmap.org/)
--   [ADSB.one](https://adsb.one/)
--   [AISstream.io](https://aisstream.io/)
--   [CoinGecko](https://www.coingecko.com/)
--   [NewsAPI](https://newsapi.org/)
--   [tomtom](https://developer.tomtom.com)
+Below is a list of APIs used in GeoSentinel and where to obtain your API keys:
+
+-   🌍 [OpenStreetMap](https://www.openstreetmap.org/) - Geocoding and map data.
+-   ✈️ [ADSB.one](https://adsb.one/) - Real-time flight tracking data.
+-   🚢 [AISstream.io](https://aisstream.io/) - Real-time vessel tracking (AIS).
+-   📊 [CoinGecko](https://www.coingecko.com/) - Cryptocurrency market data.
+-   📰 [NewsAPI](https://newsapi.org/) - Global news feeds.
+-   🗺️ [TomTom Maps](https://developer.tomtom.com) - Mapping and routing services.
+-   📶 [OpenCellID](https://opencellid.org/) - Cell tower location data.
+-   🤗 [Hugging Face](https://huggingface.co/) - AI models and inference.
+-   🤖 [OpenRouter](https://openrouter.ai/) - Unified AI model gateway.
+-   📡 [OpenSky Network](https://opensky-network.org/) - Flight metadata and routing.
+-   🌐 [MyMemory Translation](https://mymemory.translated.net/) - Free translation services.
+-   🐦 [Twitter/X API](https://developer.twitter.com/) - Social media OSINT.
+-   🔍 [DuckDuckGo](https://duckduckgo.com/) - Web search integration.
+-   🌐 [Google Search](https://www.google.com/) - Web search integration.
+-   🅱️ [Bing Search](https://www.bing.com/) - Web search integration.
+-   🔒 [Ahmia](https://ahmia.fi/) - Dark web search services.
+-   🦙 [Ollama](https://ollama.com/) - Local LLM processing.
 
 ## 🗺️ Images of GeoSentinel UI
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-08%2001-01-15.png)
