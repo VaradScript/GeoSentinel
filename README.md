@@ -214,6 +214,11 @@ ollama pull orca-mini    # Orca Mini model
 ollama serve
 ```
 
+## ▶️ Watch on YouTube
+
+[![Watch the video](https://img.youtube.com/vi/v4IKzEb03u0/0.jpg)](https://youtu.be/v4IKzEb03u0)
+
+🔗 Direct link: https://youtu.be/v4IKzEb03u0
 
 
 
