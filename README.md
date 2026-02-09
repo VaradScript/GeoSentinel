@@ -45,6 +45,9 @@ https://docs.google.com/forms/d/e/1FAIpQLSe3qBh6r1orih2MkLf5DjdolX0jv5Abct02363l
 -   🌐 Translation services.
 -   🔒 TOR integration for enhanced privacy.
 -   🤖 OLLAMA AI integration for local LLM processing.
+-   🕵️‍♂️ **Darkweb Search**: Anonymous searching across multiple .onion engines via TOR integration.
+-   🔍 **Advanced Web Scraper**: Multi-engine OSINT search with Google Dorking for social media platforms (Twitter, Reddit, Instagram, etc.).
+-   🤖 **GeoSential AI**: Intelligent assistant for automated real-time tracking of flights and vessels with integrated OSINT.
 
 ### 🌍 Earth HTML Features
 -   Interactive global map with real-time tracking
@@ -54,7 +57,9 @@ https://docs.google.com/forms/d/e/1FAIpQLSe3qBh6r1orih2MkLf5DjdolX0jv5Abct02363l
 -   Responsive design for all devices
 -   GPS metadata extraction from images
 -   Real-time data visualization
-  
+-   Integrated GeoSential AI for automated tracking and analysis
+-   Advanced web scanning with social media dorking capabilities
+
 ###    📦 Download and Move `geodata` Folder to Root Directory
 
 ### 🔗 Download Link
@@ -319,6 +324,18 @@ response = requests.post(
 
 -   **GET /api/translate**
     -   Translates text to English.
+
+### 🔍 Web Scraper
+
+-   **POST /api/tools/web_scan**
+    -   Advanced web scanning with multi-engine support and Google Dorking.
+    -   Parameters: `query`, `type` (text/images/all), `sources` (list of sites), `aggressive` (boolean).
+
+### 🤖 GeoSential AI
+
+-   **POST /api/geosentialai/chat**
+    -   Chat with the AI assistant for geospatial analysis and real-time data.
+    -   Parameters: `message`, `web_search` (boolean), `human_mode` (boolean), `engine` (cloud/local), `context` (map state).
 
 ## 🚀 How to Use
 
