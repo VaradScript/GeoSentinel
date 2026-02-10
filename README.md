@@ -1,23 +1,43 @@
 # 🌍 GeoSentinel
+
+<div align="center">
+
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Linux](https://img.shields.io/badge/Linux-Tested-green?style=for-the-badge&logo=linux)](https://www.linux.org/)
+[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen?style=for-the-badge)](https://github.com/h9zdev/GeoSentinel)
+[![GeoSentinel](https://img.shields.io/badge/GeoSentinel-Active-red?style=for-the-badge)](https://github.com/h9zdev/GeoSentinel)
+
+</div>
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/h9zdev/GeoSentinel/main/images/GeoSentinel.png" alt="GeoSentinel" />
 </p>
-
 
 **GeoSentinel** is a geospatial monitoring platform that tracks global movement in real time.
 
 It aggregates ship and flight routes, live coordinates, and geodata into a unified system, providing clear geographic and geopolitical awareness for analysis, visualization, and decision-making.
 . 🚀
 
-🚀 Visit Blog: [VaradScript.web.app](https://varadaraj.online/)
-🚀 Visit Blog: [haybnz.web.app](https://haybnz.web.app/blog)
+🚀 **Visit the Blog:**  
+👉 https://haybnz.web.app/blog
 
-> 🔴 **NOTE:**  
-> <span style="color:red;">Get Updates on the Latest Geo Sentinel AI Releases</span>  
->  
-> 👉 Subscribe here:  
-> https://docs.google.com/forms/d/e/1FAIpQLSe3qBh6r1orih2MkLf5DjdolX0jv5Abct02363lLxpXEute-Q/viewform?usp=header
+🚀 **Visit the Blog:**  
+👉 https://varadaraj.online/
 
+
+---
+
+🔴 **NOTE**  
+Stay updated with the latest **Geo Sentinel AI** releases and announcements.
+
+👉 **Subscribe here:**  
+https://docs.google.com/forms/d/e/1FAIpQLSe3qBh6r1orih2MkLf5DjdolX0jv5Abct02363lLxpXEute-Q/viewform
+
+## 📚 Documentation
+
+Detailed guides on how to use GeoSentinel's advanced features:
+- 🤖 [GeoSential AI Guide](docs/geosential_ai.md) - Learn how to use the AI assistant and its commands.
+- 🔍 [Search & Dark Web Guide](docs/search_options.md) - Instructions for OSINT and dark web searching.
 
 ## 🌟 Features
 
@@ -29,19 +49,44 @@ It aggregates ship and flight routes, live coordinates, and geodata into a unifi
 -   📰 Geopolitical news and sentiment analysis.
 -   💹 Market data for commodities and cryptocurrencies.
 -   🌐 Translation services.
--   
+-   🔒 TOR integration for enhanced privacy.
+-   🤖 OLLAMA AI integration for local LLM processing.
+-   🕵️‍♂️ **Darkweb Search**: Anonymous searching across multiple .onion engines via TOR integration.
+-   🔍 **Advanced Web Scraper**: Multi-engine OSINT search with Google Dorking for social media platforms (Twitter, Reddit, Instagram, etc.).
+-   🤖 **GeoSential AI**: Intelligent assistant for automated real-time tracking of flights and vessels with integrated OSINT.
+
+### 🌍 Earth HTML Features
+-   Interactive global map with real-time tracking
+-   Advanced search capabilities (HEX, flight, vessel, coordinates)
+-   TomTom Maps API integration for detailed mapping
+-   Activity logging and user tracking
+-   Responsive design for all devices
+-   GPS metadata extraction from images
+-   Real-time data visualization
+-   Integrated GeoSential AI for automated tracking and analysis
+-   Advanced web scanning with social media dorking capabilities
+
 ###    📦 Download and Move `geodata` Folder to Root Directory
 
 ### 🔗 Download Link
 👉 [Download geodata folder](https://drive.proton.me/urls/RJB7K8HXTM#r7PnpGiVkg6P)
 
-### 🔗 Download Link
--ADD API KEY IN app.py
--ADD API KEY IN earth.html {on line1850 const tomtomApiKey = 'ADD_API+KEY';}
+## 📝 Configuration
+
+### API Keys Required
+- **TomTom Maps API**: Add your key in `templates/earth.html` (line ~1850)
+  ```javascript
+  const tomtomApiKey = 'YOUR_TOMTOM_API_KEY';
+  ```
+
+- **Other APIs**: Add relevant API keys in `app.py`
+
+---
+
 
 # 🛰️ GeoSentinel Installation Guide
 
-## 📥 Clone or Fork the Repository
+
 
 ### Option 1: Clone directly
 ```bash
@@ -91,108 +136,127 @@ python app.py
 - Earth View  
   https://127.0.0.1:8000/earth
 
-- News Dashboard  
+- News Dashboard
   https://127.0.0.1:8000/news
 
 ---
 
-## ✅ Notes
-- SSL warnings are normal for localhost with HTTPS.
-- Use http://127.0.0.1:8000 if HTTPS is not configured.
-## ⚙️ API Endpoints
+## 🔒 TOR Installation & Setup (Linux)
 
-### 🌎 Earth
-
--   **GET /earth**
-    -   Renders the main earth page.
-
-### 🗺️ GeoJSON
-
--   **GET /api/geojson/<filename>**
-    -   Retrieves a summary of a GeoJSON file.
-    -   Example: `/api/geojson/example.geojson`
-
-### 🛰️ Surveillance Grid
-
--   **GET /api/geo/index**
-    -   Retrieves the surveillance grid index.
--   **GET /api/geo/tile/<z>/<x>/<y>**
-    -   Retrieves a specific surveillance grid tile.
-    -   Example: `/api/geo/tile/1/2/3`
-
-### ✈️ Flights
-
--   **GET /api/geo/flights**
-    -   Fetches live flight data.
--   **GET /api/geo/flight/meta/<callsign>**
-    -   Retrieves metadata for a specific flight.
-    -   Example: `/api/geo/flight/meta/UAL123`
-
-### 🚢 Vessels
-
--   **GET /api/geo/vessels**
-    -   Fetches live vessel data.
--   **GET /api/geo/vessel/path/<mmsi>**
-    -   Retrieves the historical path of a vessel.
-    -   Example: `/api/geo/vessel/path/123456789`
-
-### 📸 Image Analysis
-
--   **POST /api/geo/segment**
-    -   Performs aerial segmentation on a satellite tile.
--   **POST /api/geo/analyze-upload** or **/upload**
-    -   Analyzes an uploaded image for objects and GPS metadata.
-
-### 📰 News
-
--   **GET /api/geo/news**
-    -   Fetches geopolitical news for a specific location.
--   **POST /api/news/analyze**
-    -   Analyzes the sentiment of a news article.
--   **GET /api/news/advanced**
-    -   Performs an advanced search for news articles.
-
-### 💹 Market
-
--   **GET /api/market/data**
-    -   Fetches market data for commodities and cryptocurrencies.
-
-### 🌐 Translate
-
--   **GET /api/translate**
-    -   Translates text to English.
-
-## 🚀 How to Use
-
-
+### Option 1: Install TOR from Package Manager
 ```bash
-curl http://localhost:8000/api/geo/flights
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install tor torbrowser-launcher -y
+
+# Fedora/RHEL
+sudo dnf install tor torbrowser-launcher -y
 ```
+
+### Option 2: Install TOR from Source
+```bash
+# Download TOR
+cd /tmp
+wget https://archive.torproject.org/tor-package-archive/tor-latest.tar.gz
+tar -xzf tor-latest.tar.gz
+cd tor-*
+
+# Compile and install
+./configure
+make
+sudo make install
+```
+
+### Start TOR Service
+```bash
+# Start TOR daemon
+sudo systemctl start tor
+sudo systemctl enable tor  # Enable on boot
+
+# Or run manually
+tor
+
+# Verify TOR is running
+curl --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip
+```
+
+
+
+## 🤖 OLLAMA Installation & Setup
+
+### Installation Steps
+
+#### Step 1: Download OLLAMA
+```bash
+# macOS
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Linux
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Or download from
+https://ollama.ai/download
+```
+
+#### Step 2: Verify Installation
+```bash
+ollama --version
+```
+
+#### Step 3: Pull a Model
+```bash
+# Pull Llama 2 model (7B parameters)
+ollama pull llama2
+
+# Or pull other models
+ollama pull mistral      # Mistral model
+ollama pull neural-chat  # Neural Chat model
+ollama pull orca-mini    # Orca Mini model
+```
+
+#### Step 4: Run OLLAMA Server
+```bash
+# Start OLLAMA server (runs on localhost:11434)
+ollama serve
+```
+
+## ▶️ Watch on YouTube
+
+[![Watch the video](https://img.youtube.com/vi/v4IKzEb03u0/0.jpg)](https://youtu.be/v4IKzEb03u0)
+
+🔗 Direct link: https://youtu.be/v4IKzEb03u0
+
+
 
 ## 🙏 API TO USE
 
--   [OpenStreetMap](https://www.openstreetmap.org/)
--   [ADSB.one](https://adsb.one/)
--   [AISstream.io](https://aisstream.io/)
--   [CoinGecko](https://www.coingecko.com/)
--   [NewsAPI](https://newsapi.org/)
--   [tomtom](https://developer.tomtom.com)
+Below is a list of APIs used in GeoSentinel and where to obtain your API keys:
+
+-   🌍 [OpenStreetMap](https://www.openstreetmap.org/) - Geocoding and map data.
+-   ✈️ [ADSB.one](https://adsb.one/) - Real-time flight tracking data.
+-   🚢 [AISstream.io](https://aisstream.io/) - Real-time vessel tracking (AIS).
+-   📊 [CoinGecko](https://www.coingecko.com/) - Cryptocurrency market data.
+-   📰 [NewsAPI](https://newsapi.org/) - Global news feeds.
+-   🗺️ [TomTom Maps](https://developer.tomtom.com) - Mapping and routing services.
+-   📶 [OpenCellID](https://opencellid.org/) - Cell tower location data.
+-   🤗 [Hugging Face](https://huggingface.co/) - AI models and inference.
+-   🤖 [OpenRouter](https://openrouter.ai/) - Unified AI model gateway.
+-   📡 [OpenSky Network](https://opensky-network.org/) - Flight metadata and routing.
+-   🌐 [MyMemory Translation](https://mymemory.translated.net/) - Free translation services.
+-   🐦 [Twitter/X API](https://developer.twitter.com/) - Social media OSINT.
+-   🔍 [DuckDuckGo](https://duckduckgo.com/) - Web search integration.
+-   🌐 [Google Search](https://www.google.com/) - Web search integration.
+-   🅱️ [Bing Search](https://www.bing.com/) - Web search integration.
+-   🔒 [Ahmia](https://ahmia.fi/) - Dark web search services.
+-   🦙 [Ollama](https://ollama.com/) - Local LLM processing.
 
 ## 🗺️ Images of GeoSentinel UI
-
-
-
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-08%2001-01-15.png)
 ![GeoSentinel Screenshot](https://github.com/h9zdev/GeoSentinel/blob/main/images/Screenshot%20From%202026-01-18%2019-29-41.png)
-
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-08%2002-44-21.png)
-
-
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-16%2016-47-19.png)
-
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-16%2016-46-43.png)
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-16%2016-46-25.png)
-
 ![GeoSentinel Screenshot](images/Screenshot%20From%202026-01-09%2014-04-26.png)
 
 
